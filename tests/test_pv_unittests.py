@@ -144,13 +144,15 @@ def test_get_with_metadata():
 def test_get_string_waveform():
     write('String Array: \n')
     with no_simulator_updates():
+        nelm = int(caget(f"{pvnames.string_arr_pv}.NELM"))
+
         pv = get_pv(pvnames.string_arr_pv)
-        val = pv.get()
-        assert (len(val) > 10)
-        assert isinstance(val[0], str)
-        assert len(val[0]) > 1
-        assert isinstance(val[1], str)
-        assert len(val[1]) > 1
+        for length in [1, 2, 3, nelm]:
+            expected = [f"ITEM {index}" for index in range(length)]
+            pv.put(expected)
+            time.sleep(0.1)
+            val = pv.get()
+            assert val.tolist() == expected, f"Length {length}"
 
 def test_putcomplete():
     write('Put with wait and put_complete (using real motor!) \n')
